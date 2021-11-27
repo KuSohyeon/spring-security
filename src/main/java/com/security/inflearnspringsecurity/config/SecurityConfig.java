@@ -1,24 +1,61 @@
 package com.security.inflearnspringsecurity.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.expression.SecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.FilterInvocation;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    // 방법 1
+    public AccessDecisionManager accessDecisionManager() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER"); // ADMIN 권한은 USER 권한의 상위를 의미
+
+        DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+
+        WebExpressionVoter webExpressionVoter = new WebExpressionVoter();
+        webExpressionVoter.setExpressionHandler(handler);
+
+        List<AccessDecisionVoter<? extends Object>> voters = Arrays.asList(webExpressionVoter);
+        return new AffirmativeBased(voters);
+    }
+
+    // 방법 2
+    public SecurityExpressionHandler expressionHandler() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER"); // ADMIN 권한은 USER 권한의 상위를 의미
+
+        DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+
+        return handler;
+    }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests() // 인가에 대한 설정
                 .mvcMatchers("/", "/info", "/account/**").permitAll()
                 .mvcMatchers("/admin").hasRole("ADMIN")
+                .mvcMatchers("/user").hasRole("USER")
                 .anyRequest().authenticated()
-                .and()
-                .formLogin(); // Form Login 설정
+                .accessDecisionManager(accessDecisionManager());  // 방법 1
+//                .expressionHandler(expressionHandler());  // 방법 2
 
+        http.formLogin(); // Form Login 설정
         http.httpBasic(); // and() 사용 대신 분리 가능
     }
 

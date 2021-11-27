@@ -56,3 +56,14 @@ Authentication authenticate(Authentication authentication) throws Authentication
   - 보통 “springSecurityFilterChain” 이라는 이름의 빈으로 등록된다.
 
 ![filter-chain-proxy](src/main/resources/static/img/delegaing-filter-proxy.png)
+
+### AccessDecisionManager
+- 인가 결정을 내리는 인터페이스로, 구현체 3가지를 기본으로 제공한다.
+  - AffirmativeBased : 승인 Voter가 1개 이상 (기본 전략)
+  - ConsensusBased : 과반수
+  - UnanimouseBased : 모든 Voter 승인
+- AccessDecisionVoter
+  - 해당 Authentication이 특정한 Object에 접근할 때 필요한 ConfigAttributes를 만족하는지 확인한다.
+  - WebExpressionVoter : 웹 시큐리티에서 사용하는 기본 구현체, ROLE_XXX 가 매칭되는지 확인
+  - RoleHierarchyVoter : 계층형 ROLE 지원, ADMIN > MANAGER > USER
+    - 스프링 시큐리티는 ADMIN, USER 등의 ROLE의 권한 정도를 모르기 때문에 customize 필요 시 사용한다.
