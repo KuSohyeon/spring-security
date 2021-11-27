@@ -90,3 +90,14 @@ public void configure(WebSecurity web) throws Exception {
 ```java
     SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
 ```
+
+### SecurityContext 영속화 필터 : SecurityContextPersistenceFilter
+- SecurityContextRepository를 사용해서 기존의 SecurityContext를 읽어오거나 초기화한다.
+
+### 시큐리티 관련 헤더 추가하는 필터 : HeaderWriterFilter
+응답 헤더에 시큐리티 관련 헤더를 추가해주는 필터
+- XContentTypeOptionsHeaderWriter: 마임 타입 스니핑 방어.
+- XXssProtectionHeaderWriter: 브라우저에 내장된 XSS 필터 적용.
+- CacheControlHeadersWriter: 캐시 히스토리 취약점 방어. 
+- HstsHeaderWriter: HTTPS로만 소통하도록 강제.
+- XFrameOptionsHeaderWriter: clickjacking 방어.
