@@ -67,3 +67,16 @@ Authentication authenticate(Authentication authentication) throws Authentication
   - WebExpressionVoter : 웹 시큐리티에서 사용하는 기본 구현체, ROLE_XXX 가 매칭되는지 확인
   - RoleHierarchyVoter : 계층형 ROLE 지원, ADMIN > MANAGER > USER
     - 스프링 시큐리티는 ADMIN, USER 등의 ROLE의 권한 정도를 모르기 때문에 customize 필요 시 사용한다.
+
+### ignoring
+WebSecurity의 ignoring()을 사용해서 시큐리티 필터 적용을 제외할 요청을 설정할 수 있다.
+```java
+@Override
+public void configure(WebSecurity web) throws Exception {
+    web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+}
+```
+- ignoring() vs permitAll()
+  - 같은 결과를 볼 수는 있지만 스프링 시큐리티 필터가 적용된다는 차이가 있다.
+  - Ingore is a filter that completely bypasses spring security, which is equivalent to not taking spring security.
+  - PermitAll does not bypass spring security, which includes both logged-in and anonymous.
