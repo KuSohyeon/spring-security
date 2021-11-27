@@ -101,3 +101,11 @@ public void configure(WebSecurity web) throws Exception {
 - CacheControlHeadersWriter: 캐시 히스토리 취약점 방어. 
 - HstsHeaderWriter: HTTPS로만 소통하도록 강제.
 - XFrameOptionsHeaderWriter: clickjacking 방어.
+
+### CSRF 어택 방지 필터 : CsrfFilter
+- 인증된 유저의 계정을 사용해 악의적인 변경 요청을 만들어 보내는 기법
+- CORS를 사용할 때 특히 주의 필요
+- 의도된 사용자만 리소스를 변경할 수 있도록 허용하는 필터
+  - CSRF 토큰을 사용하여 방지 (클라이언트에서 보낸 토큰을 서버 값과 비교함)
+- JSP에서 스프링 MVC가 제공하는 \<form:form> 태그 또는 타임리프 2.1+ 버전을 사용하면 폼에 CSRF 히든 필드가 기본으로 생성됨
+![csrf.png](src/main/resources/static/img/csrf.png)
