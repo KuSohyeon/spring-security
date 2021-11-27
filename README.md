@@ -80,3 +80,13 @@ public void configure(WebSecurity web) throws Exception {
   - 같은 결과를 볼 수는 있지만 스프링 시큐리티 필터가 적용된다는 차이가 있다.
   - Ingore is a filter that completely bypasses spring security, which is equivalent to not taking spring security.
   - PermitAll does not bypass spring security, which includes both logged-in and anonymous.
+
+### Async 웹 MVC를 지원하는 필터 : WebAsyncManagerIntegrationFilter
+- 스프링 MVC의 Async의 기능(핸들러에서 Callable을 리턴할 수 있는 기능)을 사용할 때에도 SecurityContext를 공유하도록 도와주는 필터
+
+### @Async
+- `@Async`를 사용한 서비스를 호출하는 경우 Thread가 다르기 떄문에 SecurityContextHolder를 공유받지 못한다.
+- SecurityContext를 자식 Thread에도 공유하기 위해서는 아래와 같이 추가적인 설정이 필요하다.
+```java
+    SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+```

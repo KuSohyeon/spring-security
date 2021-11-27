@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
@@ -64,6 +65,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.formLogin(); // Form Login 설정
         http.httpBasic(); // and() 사용 대신 분리 가능
+
+        // 현재 스레드에서 생성하는 하위 프로세스로 생성하는 스레드에서도 SecurityContext를 공유하는 설정
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
 
 // InMemory user 추가
