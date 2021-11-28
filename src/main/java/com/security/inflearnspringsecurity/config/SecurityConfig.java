@@ -63,8 +63,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .accessDecisionManager(accessDecisionManager());  // 방법 1
 //                .expressionHandler(expressionHandler());  // 방법 2
 
-        http.formLogin(); // Form Login 설정
+        http.formLogin() // Form Login 설정
+            .loginPage("/login").permitAll();
+
         http.httpBasic(); // and() 사용 대신 분리 가능
+
+        http.logout().logoutSuccessUrl("/");
 
         // 현재 스레드에서 생성하는 하위 프로세스로 생성하는 스레드에서도 SecurityContext를 공유하는 설정
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);

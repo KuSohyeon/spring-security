@@ -109,3 +109,35 @@ public void configure(WebSecurity web) throws Exception {
   - CSRF 토큰을 사용하여 방지 (클라이언트에서 보낸 토큰을 서버 값과 비교함)
 - JSP에서 스프링 MVC가 제공하는 \<form:form> 태그 또는 타임리프 2.1+ 버전을 사용하면 폼에 CSRF 히든 필드가 기본으로 생성됨
 ![csrf.png](src/main/resources/static/img/csrf.png)
+
+### 로그아웃 처리 필터 : LogoutFilter
+- 여러 LogoutHandler를 사용하여 로그아웃 시 필요한 처리를 하며 이후에는 LogoutSuccessHandler를 사용하여 로그아웃 후 처리를 한다.
+- LogoutHandler
+  - CsrfLogoutHandler
+  - SecurityContextLogoutHandler
+- LogoutSuccessHandler
+  - SimpleUrlLogoutSuccessHandler
+```java
+http.logout()
+        .logoutUrl("/logout")
+        .logoutSuccessUrl("/")
+        .logoutRequestMatcher() 
+        .invalidateHttpSession(true) 
+        .deleteCookies() 
+        .addLogoutHandler() 
+        .logoutSuccessHandler();
+```
+
+### 폼 인증 처리 필터 : UsernamePasswordAuthenticationFilter
+> 폼 로그인을 처리하는 필터
+- 사용자가 폼에 입력한 usernamer과 password로 Authentication을 만들고 AuthenticationManger를 사용하여 인증을 시도한다.
+- AuthenticationManger(ProviderManager)는 여러 AuthenticationProvider를 사용하여 인증을 시도하는데,
+  그 중 DaoAuthenticationProvider는 UserDetailService를 사용하여 UserDetails 정보를 가져와 사용자가 입력한 password와 비교한다.
+
+### DefaultLoginPageGeneratingFilter
+> 기본 로그인 폼 페이지를 생성해주는 필터
+```java
+http.formLogin()
+        .usernameParameter("id")
+        .passwordParameter("pw");
+```
