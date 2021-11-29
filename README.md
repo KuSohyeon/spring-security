@@ -108,6 +108,7 @@ public void configure(WebSecurity web) throws Exception {
 - 의도된 사용자만 리소스를 변경할 수 있도록 허용하는 필터
   - CSRF 토큰을 사용하여 방지 (클라이언트에서 보낸 토큰을 서버 값과 비교함)
 - JSP에서 스프링 MVC가 제공하는 \<form:form> 태그 또는 타임리프 2.1+ 버전을 사용하면 폼에 CSRF 히든 필드가 기본으로 생성됨
+
 ![csrf.png](src/main/resources/static/img/csrf.png)
 
 ### 로그아웃 처리 필터 : LogoutFilter
@@ -140,4 +141,67 @@ http.logout()
 http.formLogin()
         .usernameParameter("id")
         .passwordParameter("pw");
+```
+
+### Basic 인증 처리 필터 : BasicAuthenticationFilter
+- Basic 인증이란?
+  - 요청 헤더에 username, password를 실어보내면 브라우저 또는 서버가 그 값을 읽어서 인증하는 방식
+  - 보안에 취약하기 때문에 HTTPS를 사용할 것을 권장
+
+### 요청 캐시 필터 : RequestCacheAwareFilter
+- 현재 요청과 관련 있는 캐시된 요청이 있는지 찾아서 적용하는 필터
+  - 캐시된 요청이 없다면, 현재 요청 처리
+  - 캐시된 요청이 있다면, 해당 캐싱된 요청 처리
+
+### 익명 인증 필터 : AnonymousAuthenticationFilter
+- 현재 SecurityContext에 Authentication이 null이면 익명 Authentication을 만들어 넣어주고 null이 아니면 아무일도 하지 않는다.
+
+### 세션 관리 필터 : SessionManagementFilter
+- 세션 변조 방지 전략 설정 : sessionFixation
+- 유효하지 않은 세션을 리다이렉트 시킬 URL 설정
+  - invalidSessionUrl
+- 동시성 제어 : maximumSessions
+  - 추가 로그인을 막을지 여부 설정
+- 세션 생성 전략 : sessionCreationPolicy
+  - IF_REQUIRED
+  - NEVER
+  - STATELESS
+  - ALWAYS
+```java
+        http.sessionManagement()
+            .maximumSessions(1);  // 1개의 세션만 허용
+```
+
+### 인증/인가 예외 처리 필터 : ExceptionTranslationFilter
+- 인증, 인가 에러 처리를 담당하는 필터
+- AuthenticationEntryPoint
+- AccessDeniedHandler
+
+### 인가 처리 필터 : FilterSecurityInterceptor
+- HTTP 리소스 시큐리티를 담당하는 필터
+- AccessDecisionManager를 사용하여 인가를 처리한다.
+```java
+http.authorizeRequests()
+        .mvcMatchers("/", "/info", "/account/**", "/signup")
+        .permitAll() 
+        .mvcMatchers("/admin")
+        .hasAuthority("ROLE_ADMIN") 
+        .mvcMatchers("/user")
+        .hasRole("USER") 
+        .anyRequest()
+        .authenticated() 
+        .expressionHandler(expressionHandler());
+```
+### 토큰 기반 인증 필터 : RememberMeAuthenticationFilter
+- 세션이 사라지거나 만료되더라도 쿠키 또는 DB를 사용하여 저장된 토큰 기반으로 인증을 지원하는 필터
+```java
+http.rememberMe() 
+        .userDetailsService(accountService) 
+        .key("remember-me-sample");
+```
+
+### 커스텀 필터 추가
+```java
+http.addFilterAfter(new LoggingFilter(), UsernamePasswordAuthenticationFilter.class);
+http.addFilterAfter(new LoggingFilter(), UsernamePasswordAuthenticationFilter.class);
 ```
