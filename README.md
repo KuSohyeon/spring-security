@@ -205,3 +205,45 @@ http.rememberMe()
 http.addFilterAfter(new LoggingFilter(), UsernamePasswordAuthenticationFilter.class);
 http.addFilterAfter(new LoggingFilter(), UsernamePasswordAuthenticationFilter.class);
 ```
+
+### 메소드 시큐리티
+```java
+@Configuration
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true, jsr250Enabled = true)
+public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+  @Override
+  protected AccessDecisionManager accessDecisionManager() {
+    RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl(); roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER"); AffirmativeBased accessDecisionManager = (AffirmativeBased)
+            super.accessDecisionManager(); accessDecisionManager.getDecisionVoters().add(new
+            RoleHierarchyVoter(roleHierarchy)); return accessDecisionManager;
+  }
+}
+```
+- @Secured와 @RollAllowed
+  - 메소드 호출 이전에 권한을 확인한다.
+  - 스프링 EL을 사용하지 못한다.
+- @PreAuthorize와 @PostAuthorize
+  - 메소드 호출 이전 @있다.
+
+### @AuthenticationPrincipal
+웹 MVC 핸들러 아규먼트로 Principal 객체를 받을 수 있다. 커스텀 유저 클래스 구현하기
+```java
+public class UserAccount extends User { // User 상속
+    
+  private Account account;
+  
+  public UserAccount(Account account) { 
+      super(account.getUsername(), account.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_" + account.getRole()))); this.account = account;
+  }
+  
+  public Account getAccount() { 
+      return account;
+  } 
+  
+}
+
+// 사용방법
+@AuthenticationPrincipal UserAccount userAccount;
+```
+- UserDetailsService 구현체에서 리턴하는 객체를 매개변수로 받을 수 있다.
+  - 그 안에 들어있는 Account객체를 getter를 통해 참조할 수 있다.
